@@ -1,0 +1,24 @@
+{
+  "command": "sweep",
+  "args": {
+    "arms": 20,
+    "steps": 4000,
+    "seed": 123,
+    "learner": "epsilon-greedy",
+    "reward_distribution": "uniform",
+    "mean_profile": "uniform",
+    "mean_low": 3.0,
+    "mean_high": 15.0,
+    "std_profile": "constant",
+    "std_value": 0.12,
+    "top_offset": 0.35,
+    "init_value": 0.5,
+    "epsilon": 0.1,
+    "epsilon_decay": 0.05,
+    "epsilon_min": 0.01,
+    "rho_values": "0.25,0.5,0.75,1.0,1.25,1.5,1.75,2.0",
+    "repeats": 15,
+    "sweep_csv": "outputs/rho_sweep.csv",
+    "plot_prefix": "outputs/rho_sweep"
+  }
+}

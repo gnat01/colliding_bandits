@@ -1,0 +1,24 @@
+{
+  "command": "run",
+  "args": {
+    "arms": 32,
+    "players": 40,
+    "steps": 10000,
+    "seed": 123,
+    "learner": "epsilon-greedy",
+    "reward_distribution": "gamma",
+    "mean_profile": "two-tier",
+    "mean_low": 0.1,
+    "mean_high": 1.0,
+    "std_profile": "constant",
+    "std_value": 0.15,
+    "top_offset": 0.35,
+    "init_value": 0.5,
+    "epsilon": 0.1,
+    "epsilon_decay": 0.05,
+    "epsilon_min": 0.01,
+    "summary_json": "outputs/medium_run_summary.json",
+    "time_series_csv": "outputs/medium_run_timeseries.csv",
+    "plot_prefix": "outputs/medium_run"
+  }
+}
