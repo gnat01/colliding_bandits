@@ -1,0 +1,18 @@
+Warmup problem
+
+If N users and M arms and M >= N, order one by one by simple pigeonhole principle and get that each user gets rewqard 1 at each time step and total reward 
+after T steps = N per user and NT total
+
+If N, M s.t. M < N, Then :
+
+Each arm gets at least Floor(N/M) users; in addition 
+
+the first N - M. Floor(N/M) get the remainder of users => their user count is Floor(N/M) + 1
+
+
+If this floor > 1 == immediate zero reward as EVERY user has a collision by pigonehole prinxiple
+
+In such case, max reward from pigeonholing is : the number of users n with no collisions n = (M - N + M*Floor(N/M)) when Floor(N/M) = 1
+total max possible reward after T steps = n.T
+
+if Floor(N/M) > 1 - of course reward for each user = 0 forever

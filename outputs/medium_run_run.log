@@ -1,0 +1,103 @@
+arms=60
+players=300
+exploration_cycles=10
+exploration_steps=600
+strategy_steps=1000
+total_steps=1600
+seed=123
+learner=epsilon-greedy
+reward_distribution=uniform
+rho=5.000000
+
+best_arm_index=46
+best_arm_mean=91.407768
+best_arm_std=0.150000
+worst_arm_index=38
+worst_arm_mean=0.666220
+worst_arm_std=0.150000
+
+arm_table:
+  arm=00 mean=83.864846 std=0.150000
+  arm=01 mean=24.893754 std=0.150000
+  arm=02 mean=57.530267 std=0.150000
+  arm=03 mean=14.646419 std=0.150000
+  arm=04 mean=65.978379 std=0.150000
+  arm=05 mean=59.961147 std=0.150000
+  arm=06 mean=34.023157 std=0.150000
+  arm=07 mean=18.555759 std=0.150000
+  arm=08 mean=89.064808 std=0.150000
+  arm=09 mean=85.282619 std=0.150000
+  arm=10 mean=43.909441 std=0.150000
+  arm=11 mean=9.175074 std=0.150000
+  arm=12 mean=16.386408 std=0.150000
+  arm=13 mean=45.948323 std=0.150000
+  arm=14 mean=53.852103 std=0.150000
+  arm=15 mean=33.942557 std=0.150000
+  arm=16 mean=41.020555 std=0.150000
+  arm=17 mean=31.888168 std=0.150000
+  arm=18 mean=67.012787 std=0.150000
+  arm=19 mean=61.085801 std=0.150000
+  arm=20 mean=31.868684 std=0.150000
+  arm=21 mean=17.427625 std=0.150000
+  arm=22 mean=9.730074 std=0.150000
+  arm=23 mean=48.870579 std=0.150000
+  arm=24 mean=34.674485 std=0.150000
+  arm=25 mean=80.248911 std=0.150000
+  arm=26 mean=64.016150 std=0.150000
+  arm=27 mean=82.108923 std=0.150000
+  arm=28 mean=2.612979 std=0.150000
+  arm=29 mean=45.108010 std=0.150000
+  arm=30 mean=75.540231 std=0.150000
+  arm=31 mean=40.124696 std=0.150000
+  arm=32 mean=33.553671 std=0.150000
+  arm=33 mean=57.554105 std=0.150000
+  arm=34 mean=5.710178 std=0.150000
+  arm=35 mean=81.029183 std=0.150000
+  arm=36 mean=90.587166 std=0.150000
+  arm=37 mean=39.423734 std=0.150000
+  arm=38 mean=0.666220 std=0.150000
+  arm=39 mean=68.641303 std=0.150000
+  arm=40 mean=21.082816 std=0.150000
+  arm=41 mean=66.832434 std=0.150000
+  arm=42 mean=90.169288 std=0.150000
+  arm=43 mean=76.995077 std=0.150000
+  arm=44 mean=9.217543 std=0.150000
+  arm=45 mean=11.216173 std=0.150000
+  arm=46 mean=91.407768 std=0.150000
+  arm=47 mean=77.043269 std=0.150000
+  arm=48 mean=33.712741 std=0.150000
+  arm=49 mean=52.943958 std=0.150000
+  arm=50 mean=51.518837 std=0.150000
+  arm=51 mean=34.053057 std=0.150000
+  arm=52 mean=3.668210 std=0.150000
+  arm=53 mean=7.792432 std=0.150000
+  arm=54 mean=91.159480 std=0.150000
+  arm=55 mean=37.764902 std=0.150000
+  arm=56 mean=79.112149 std=0.150000
+  arm=57 mean=7.452758 std=0.150000
+  arm=58 mean=26.899510 std=0.150000
+  arm=59 mean=4.296290 std=0.150000
+
+summary:
+  rho=5.0
+  exploration_steps=600.0
+  strategy_steps=1000.0
+  oracle_mean_expected=91.40776823049084
+  mean_reward_final=8.746887202776126
+  mean_reward_average=8.686246151307616
+  mean_regret_final=132344.47692752886
+  mean_regret_average=66157.8297262612
+  system_reward_final=2624.066160832838
+  system_reward_average=2605.8738453922847
+  efficiency_final=0.0958483391473764
+  efficiency_average=0.09503417220966451
+  occupancy_variance_final=17.3
+  occupancy_variance_average=20.221395833333332
+  player_reward_variance_final=7.382038316158238
+  player_reward_variance_average=24.099362311133003
+  cumulative_regret_final=39703343.078258686
+  late_regret_rate=24807.079225120582
+  best_arm_index=46.0
+  best_arm_mean=91.40776823049084
+  worst_arm_index=38.0
+  worst_arm_mean=0.6662200811326742

@@ -128,9 +128,16 @@ def _plot_occupancy_animation(prefix: Path, rows, reward_rows, exploration_steps
             for key in arm_keys
         ]
         avg_rewards.sort(key=lambda item: item[1], reverse=True)
+        best_key, best_value = avg_rewards[0]
+        worst_key, worst_value = avg_rewards[-1]
         top_lines = [
             f"{rank+1}. {key.replace('arm_', 'A')} : {value:.3f}"
             for rank, (key, value) in enumerate(avg_rewards[:10])
+        ]
+        summary_lines = [
+            "",
+            f"Best  : {best_key.replace('arm_', 'A')} = {best_value:.3f}",
+            f"Worst : {worst_key.replace('arm_', 'A')} = {worst_value:.3f}",
         ]
 
         fig, (ax, text_ax) = plt.subplots(
@@ -158,7 +165,7 @@ def _plot_occupancy_animation(prefix: Path, rows, reward_rows, exploration_steps
         text_ax.text(
             0.0,
             1.0,
-            "\n".join(top_lines),
+            "\n".join(top_lines + summary_lines),
             ha="left",
             va="top",
             family="monospace",
