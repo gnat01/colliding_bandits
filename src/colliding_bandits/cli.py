@@ -8,14 +8,14 @@ from statistics import mean
 from typing import Dict, List
 
 from .models import parse_float_list
-from .plotting import plot_sweep_lines, plot_time_series
+from .plotting import plot_experiment, plot_sweep_lines
 from .simulator import (
     SimulationConfig,
     expand_rho_grid,
     run_simulation,
     write_summary_json,
     write_sweep_csv,
-    write_time_series_csv,
+    write_tables,
 )
 
 DEFAULT_CONFIG_PATH = Path("config/default.json")
@@ -40,7 +40,8 @@ def _reward_vectors(args: argparse.Namespace) -> tuple[List[float] | None, List[
 def add_common_args(parser: argparse.ArgumentParser, *, require_players: bool) -> None:
     parser.add_argument("--arms", type=int, required=True, help="Number of arms K.")
     parser.add_argument("--players", type=int, required=require_players, help="Number of players N.")
-    parser.add_argument("--steps", type=int, required=True, help="Simulation horizon.")
+    parser.add_argument("--exploration-cycles", type=int, required=True, help="How many full offset cycles each player executes in exploration.")
+    parser.add_argument("--strategy-steps", type=int, required=True, help="Number of strategy-phase steps after exploration.")
     parser.add_argument("--seed", type=int, default=123, help="Base random seed.")
     parser.add_argument(
         "--learner",
@@ -82,6 +83,11 @@ def add_common_args(parser: argparse.ArgumentParser, *, require_players: bool) -
     )
     parser.add_argument("--std-value", type=float, default=0.15, help="Internal standard deviation scale.")
     parser.add_argument("--top-offset", type=float, default=0.35, help="Top-band offset for two-tier means.")
+    parser.add_argument(
+        "--randomise-arms",
+        action="store_true",
+        help="Shuffle the internally generated arms so higher indices do not systematically get higher means.",
+    )
     parser.add_argument("--init-value", type=float, default=0.5, help="Initial per-arm estimate.")
     parser.add_argument("--epsilon", type=float, default=0.1, help="Base epsilon for epsilon-greedy.")
     parser.add_argument("--epsilon-decay", type=float, default=0.0, help="Power-law epsilon decay.")
@@ -94,7 +100,8 @@ def build_config(args: argparse.Namespace) -> SimulationConfig:
     return SimulationConfig(
         arms=args.arms,
         players=args.players,
-        steps=args.steps,
+        exploration_cycles=args.exploration_cycles,
+        strategy_steps=args.strategy_steps,
         seed=args.seed,
         learner=args.learner,
         mean_profile="explicit" if means is not None else args.mean_profile,
@@ -105,6 +112,7 @@ def build_config(args: argparse.Namespace) -> SimulationConfig:
         mean_high=args.mean_high,
         std_value=args.std_value,
         top_offset=args.top_offset,
+        randomise_arms=args.randomise_arms,
         reward_distribution=args.reward_distribution,
         collision_rule="split",
         init_value=args.init_value,
@@ -145,7 +153,10 @@ def write_run_log(path: Path, result) -> None:
     lines = [
         f"arms={result.config.arms}",
         f"players={result.config.players}",
-        f"steps={result.config.steps}",
+        f"exploration_cycles={result.config.exploration_cycles}",
+        f"exploration_steps={result.config.exploration_steps}",
+        f"strategy_steps={result.config.strategy_steps}",
+        f"total_steps={result.config.total_steps}",
         f"seed={result.config.seed}",
         f"learner={result.config.learner}",
         f"reward_distribution={result.config.reward_distribution}",
@@ -172,10 +183,11 @@ def command_run(args: argparse.Namespace) -> int:
     print_summary(result.summary)
     if args.summary_json:
         write_summary_json(Path(args.summary_json), result)
-    if args.time_series_csv:
-        write_time_series_csv(Path(args.time_series_csv), result.time_series)
+    if args.table_prefix:
+        for path in write_tables(Path(args.table_prefix), result):
+            print(f"wrote table: {path}")
     if args.plot_prefix:
-        for path in plot_time_series(Path(args.plot_prefix), result.time_series):
+        for path in plot_experiment(Path(args.plot_prefix), result):
             print(f"wrote plot: {path}")
     run_log_path = _default_run_log_path(args)
     if run_log_path is not None:
@@ -238,13 +250,18 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser = subparsers.add_parser("run", help="Run one simulation.")
     add_common_args(run_parser, require_players=True)
     run_parser.add_argument("--summary-json", type=str, default=None, help="Optional JSON summary output.")
-    run_parser.add_argument("--time-series-csv", type=str, default=None, help="Optional CSV time-series output.")
     run_parser.add_argument("--run-log", type=str, default=None, help="Optional plain-text run log.")
+    run_parser.add_argument(
+        "--table-prefix",
+        type=str,
+        default=None,
+        help="Prefix for CSV tables, e.g. outputs/run gives outputs/run_player_total_reward.csv.",
+    )
     run_parser.add_argument(
         "--plot-prefix",
         type=str,
         default=None,
-        help="Prefix for time-series PNGs, e.g. outputs/run gives outputs/run_mean_reward.png.",
+        help="Prefix for experiment PNGs, e.g. outputs/run gives outputs/run_player_total_reward.png.",
     )
     run_parser.set_defaults(func=command_run)
 

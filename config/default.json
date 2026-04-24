@@ -1,15 +1,16 @@
 {
   "command": "run",
   "args": {
-    "arms": 32,
-    "players": 40,
-    "steps": 10000,
+    "arms": 60,
+    "players": 300,
+    "exploration_cycles": 30,
+    "strategy_steps": 1000,
     "seed": 123,
     "learner": "epsilon-greedy",
-    "reward_distribution": "gamma",
-    "mean_profile": "two-tier",
-    "mean_low": 0.1,
-    "mean_high": 1.0,
+    "reward_distribution": "uniform",
+    "mean_profile": "uniform",
+    "mean_low": 0.5,
+    "mean_high": 10.0,
     "std_profile": "constant",
     "std_value": 0.15,
     "top_offset": 0.35,
@@ -17,8 +18,9 @@
     "epsilon": 0.1,
     "epsilon_decay": 0.05,
     "epsilon_min": 0.01,
+    "randomise_arms": true,
     "summary_json": "outputs/medium_run_summary.json",
-    "time_series_csv": "outputs/medium_run_timeseries.csv",
+    "table_prefix": "outputs/medium_run",
     "plot_prefix": "outputs/medium_run"
   }
 }

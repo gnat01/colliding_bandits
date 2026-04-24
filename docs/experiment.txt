@@ -1,0 +1,43 @@
+Experiment 1 :
+
+Consider N players and M arms
+
+The M arms are characterised by a mean m_i and sd sd_i 
+
+
+The exploration phase : 
+
+For each player -- they cycle through the N arms IN order but not all starting at 1. So player 1 starts at maybe 1 and goes till M, player 2 may start at 6 and go to M, then back 1-5 and so on
+
+This phase is done say k times
+
+Rewards : Equal splits : If p players land on arm a - their reward is sampled from Gamma(m_a, sd_a) OR Unif(m_a, sd_a) as chosen initially and if that reward is r, each of the p players gets an equal r / p
+
+Each player MUST maintain, for themselves, the estimated mean and sd of each arm. Note that OFCOURSE this can be slightly different
+
+
+The strategy phase : Depending on whether we choose to be eps-greedy or UCB1, in this phase -- each player now uses that strategy to decide what arm to pull and reaps the corresponding reward.
+
+As usual, when collisions happenm rewards are split ; if no collisions, full reward.
+
+We track : at every time step from the sxtart -- total reward of each player ; how many times each arm has been played till a time t AND how many times there have been collisions on an arm till time t; 
+
+
+ORACLE ::
+
+N < K and oracle
+When num players < num arms, oracle maximises total reward by occupying the best K arms by expected mean and sd which it knows. 
+N>K, All arms are occupied simply because of the equal split arrangement of rewards - the best one can do there for cumulative reward is the sum of all expected rewards (all rewards are positive)
+
+Mean oracle reward at a time t = oracel reward at t / N
+There is therefore the notion of a player regret relative to this reward if we want to plot and see that over time, there is also the more robust mean player reward at t against the mean oracle reward at t for a mean regret over time
+
+PLOTS AND TABLES ::
+In the plots -- we need to know which is the exploration phase and which is the strategy phase so maybe have a blue vertical line in time to demarcate 
+
+Each time step - player total reward ; player regret against the oracle at time t; until time t how many times has an arm been played and how many collisions on the arm until time t for all arms ; for each player at each time - what arm did it choose? 
+
+PHASE TRANSITIONS ETC ::
+
+After all this setup, we can start to think if there are natural areas where rho = N/K allows for Feigenbaumian and Wilsonian RG ideas to be seen
+
