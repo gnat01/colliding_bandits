@@ -18,12 +18,14 @@ Each config file is JSON:
 - `run`
 - `sweep`
 - `collapse`
+- `collapse-ggplot`
 
 ## Default Files
 
 - [config/default.json](/Users/gn/work/learn/python/colliding_bandits/config/default.json)
 - [config/rho_sweep.json](/Users/gn/work/learn/python/colliding_bandits/config/rho_sweep.json)
 - [config/collapse_sweep.json](/Users/gn/work/learn/python/colliding_bandits/config/collapse_sweep.json)
+- [config/collapse_ggplot.json](/Users/gn/work/learn/python/colliding_bandits/config/collapse_ggplot.json)
 
 ## Keys For `run`
 
@@ -99,6 +101,11 @@ This mode is currently intended for `epsilon-greedy`, because the scaling variab
 scaled_1 = arms / epsilon
 ```
 
+## Keys For `collapse-ggplot`
+
+- `input_csv`
+- `output_prefix`
+
 ## Intended Workflow
 
 Medium run:
@@ -117,6 +124,12 @@ Scaling collapse:
 
 ```bash
 python src/cli.py --config config/collapse_sweep.json
+```
+
+GGPlot render:
+
+```bash
+python src/cli.py --config config/collapse_ggplot.json
 ```
 
 ## `randomise_arms`

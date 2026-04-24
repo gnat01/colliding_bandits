@@ -1,0 +1,7 @@
+{
+  "command": "collapse-ggplot",
+  "args": {
+    "input_csv": "outputs/collapse_sweep.csv",
+    "output_prefix": "outputs/collapse_sweep"
+  }
+}

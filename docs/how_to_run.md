@@ -66,6 +66,18 @@ and sweeps over:
 
 then groups players by their learned best arm at the end of the run and writes the collapse table plus faceted PNG/PDF plots.
 
+To render the same collapse table with `ggplot2` instead of `matplotlib`:
+
+```bash
+python src/cli.py --config config/collapse_ggplot.json
+```
+
+This reads:
+
+- `outputs/collapse_sweep.csv`
+
+and writes `ggplot2` outputs with the same panel logic.
+
 ## Experiment Structure
 
 Each experiment has two phases.
@@ -216,6 +228,14 @@ Collapse outputs already generated:
 - [outputs/collapse_sweep_collapse_scaled.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled.pdf)
 - [outputs/collapse_sweep_collapse_scaled_per_player.png](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_per_player.png)
 - [outputs/collapse_sweep_collapse_scaled_per_player.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_per_player.pdf)
+
+GGPlot collapse outputs:
+
+- [outputs/collapse_sweep_collapse_by_epsilon_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_by_epsilon_ggplot.pdf)
+- [outputs/collapse_sweep_collapse_by_arms_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_by_arms_ggplot.pdf)
+- [outputs/collapse_sweep_collapse_scaled_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_ggplot.pdf)
+- [outputs/collapse_sweep_collapse_scaled_per_player_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_per_player_ggplot.pdf)
+- [outputs/collapse_sweep_ggplot_bundle.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_ggplot_bundle.pdf)
 
 ## If You Want Your Own Config
 

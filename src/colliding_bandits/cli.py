@@ -5,6 +5,7 @@ from dataclasses import replace
 import json
 from pathlib import Path
 from statistics import mean, stdev
+import subprocess
 from typing import Dict, List
 
 from .models import parse_float_list
@@ -329,6 +330,21 @@ def command_collapse(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_collapse_ggplot(args: argparse.Namespace) -> int:
+    script_path = Path(__file__).with_name("collapse_ggplot.R")
+    input_csv = Path(args.input_csv)
+    if not input_csv.exists():
+        raise FileNotFoundError(f"Collapse CSV not found: {input_csv}")
+    output_prefix = Path(args.output_prefix)
+    output_prefix.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["Rscript", str(script_path), str(input_csv), str(output_prefix)],
+        check=True,
+    )
+    print(f"wrote ggplot bundle: {output_prefix}_ggplot_bundle.pdf")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="colliding-bandits",
@@ -385,6 +401,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Prefix for collapse PNG/PDF plots, e.g. outputs/collapse gives outputs/collapse_scaled.pdf.",
     )
     collapse_parser.set_defaults(func=command_collapse)
+
+    collapse_ggplot_parser = subparsers.add_parser("collapse-ggplot", help="Render collapse CSV with ggplot2.")
+    collapse_ggplot_parser.add_argument("--input-csv", type=str, required=True, help="Collapse CSV produced by the collapse command.")
+    collapse_ggplot_parser.add_argument("--output-prefix", type=str, required=True, help="Prefix for ggplot outputs.")
+    collapse_ggplot_parser.set_defaults(func=command_collapse_ggplot)
     return parser
 
 
