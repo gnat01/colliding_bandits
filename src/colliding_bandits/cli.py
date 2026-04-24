@@ -210,38 +210,36 @@ def _average_rows(rows: List[Dict[str, float]]) -> Dict[str, float]:
 
 
 def _collapse_rows_from_result(result, *, epsilon: float, repeat_idx: int) -> List[Dict[str, float]]:
-    final_totals_row = result.player_total_reward_rows[-1]
-    player_totals = {
-        player_idx: final_totals_row[f"player_{player_idx}"]
-        for player_idx in range(result.config.players)
-    }
     grouped_estimates: Dict[int, List[Dict[str, float]]] = {}
     for row in result.final_estimate_rows:
         grouped_estimates.setdefault(int(row["player"]), []).append(row)
 
-    arm_to_totals: Dict[int, List[float]] = {}
+    arm_to_payoffs: Dict[int, List[float]] = {}
     for player_idx, rows in grouped_estimates.items():
-        best_row = max(rows, key=lambda row: (row["estimated_mean"], row["samples"], -row["arm"]))
-        best_arm = int(best_row["arm"])
-        arm_to_totals.setdefault(best_arm, []).append(player_totals[player_idx])
+        cumulative_rows = []
+        for row in rows:
+            cumulative_reward = row["estimated_mean"] * row["samples"]
+            cumulative_rows.append((int(row["arm"]), cumulative_reward))
+        best_arm, best_payoff = max(cumulative_rows, key=lambda item: (item[1], -item[0]))
+        arm_to_payoffs.setdefault(best_arm, []).append(best_payoff)
 
     collapse_rows: List[Dict[str, float]] = []
-    for arm_index, totals in sorted(arm_to_totals.items()):
-        cluster_size = len(totals)
-        avg_total = mean(totals)
-        sd_total = stdev(totals) if len(totals) >= 2 else 0.0
+    for arm_index, payoffs in sorted(arm_to_payoffs.items()):
+        cluster_size = len(payoffs)
+        avg_payoff = mean(payoffs)
+        sd_payoff = stdev(payoffs) if len(payoffs) >= 2 else 0.0
         collapse_rows.append(
             {
                 "value": float(arm_index),
-                "m": avg_total,
-                "s": sd_total,
+                "m": avg_payoff,
+                "s": sd_payoff,
                 "n": float(cluster_size),
                 "arms": float(result.config.arms),
                 "epsilon": epsilon,
                 "scaled_1": result.config.arms / epsilon,
                 "players": float(result.config.players),
                 "repeat": float(repeat_idx),
-                "m_per_player": avg_total / result.config.players,
+                "m_per_player": avg_payoff / result.config.players,
                 "best_arm_mean": result.summary["best_arm_mean"],
             }
         )

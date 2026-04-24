@@ -390,20 +390,24 @@ def plot_collapse_panels(prefix: Path, rows: Sequence[dict]) -> List[Path]:
     if not valid_rows:
         return []
 
+    figures = []
+
     def _facet_plot(
         suffix: str,
-        title: str,
+        title: str | None,
         facet_key: str,
         color_key: str,
         y_key: str,
+        nrows: int,
+        x_label: str,
         y_label: str,
+        legend_title: str,
     ) -> List[Path]:
         facet_values = sorted({row[facet_key] for row in valid_rows})
-        ncols = min(3, max(1, len(facet_values)))
-        nrows = (len(facet_values) + ncols - 1) // ncols
-        fig, axes = plt.subplots(nrows, ncols, figsize=(5.2 * ncols, 4.3 * nrows), squeeze=False)
+        ncols = max(1, (len(facet_values) + nrows - 1) // nrows)
+        fig, axes = plt.subplots(nrows, ncols, figsize=(4.0 * ncols, 2.8 * nrows), squeeze=False)
         color_values = sorted({row[color_key] for row in valid_rows})
-        cmap = plt.get_cmap("viridis")
+        cmap = plt.get_cmap("tab10")
         color_map = {
             value: cmap(index / max(1, len(color_values) - 1))
             for index, value in enumerate(color_values)
@@ -415,69 +419,108 @@ def plot_collapse_panels(prefix: Path, rows: Sequence[dict]) -> List[Path]:
                 curve = [row for row in subset if row[color_key] == color_value and row[y_key] > 0]
                 if not curve:
                     continue
-                curve = sorted(curve, key=lambda row: row["n"])
                 xs = [row["n"] for row in curve]
                 ys = [row[y_key] for row in curve]
-                ax.plot(xs, ys, marker="o", linewidth=1.2, markersize=4, alpha=0.9, color=color_map[color_value], label=str(color_value))
-            ax.set_xscale("log")
-            ax.set_yscale("log")
-            ax.set_title(f"{facet_key} = {facet_value:g}")
-            ax.set_xlabel("n")
+                log_xs = [__import__("math").log(x) for x in xs if x > 0]
+                log_ys = [__import__("math").log(y) for y in ys if y > 0]
+                points = list(zip(log_xs, log_ys))
+                if not points:
+                    continue
+                ax.scatter(
+                    [point[0] for point in points],
+                    [point[1] for point in points],
+                    s=20,
+                    alpha=0.95,
+                    color=color_map[color_value],
+                    label=_format_factor_label(color_value),
+                )
+            ax.set_title(_format_factor_label(facet_value), fontsize=10)
+            ax.set_xlabel(x_label)
             ax.set_ylabel(y_label)
-            ax.grid(alpha=0.25)
+            ax.grid(False)
 
         for ax in axes.flat[len(facet_values):]:
             ax.axis("off")
 
         handles, labels = axes.flat[0].get_legend_handles_labels()
         if handles:
-            fig.legend(handles, labels, title=color_key, loc="upper center", ncol=min(5, len(labels)))
-        fig.suptitle(title)
-        fig.tight_layout(rect=(0, 0, 1, 0.94))
+            fig.legend(handles, labels, title=legend_title, loc="center right", frameon=False)
+        if title:
+            fig.suptitle(title)
+            fig.tight_layout(rect=(0, 0, 0.9, 0.95))
+        else:
+            fig.tight_layout(rect=(0, 0, 0.9, 1))
+        figures.append(fig)
         output_path = Path(f"{prefix}_{suffix}.png")
         saved = _save_figure(fig, output_path)
-        plt.close(fig)
         return saved
 
     written: List[Path] = []
     written.extend(
         _facet_plot(
             "collapse_by_epsilon",
-            "Collapse View By epsilon",
+            None,
             "epsilon",
             "arms",
             "m",
-            "m",
+            3,
+            "log(n)",
+            "log(m)",
+            "factor(n_arms)",
         )
     )
     written.extend(
         _facet_plot(
             "collapse_by_arms",
-            "Collapse View By arms",
+            None,
             "arms",
             "epsilon",
             "m",
-            "m",
+            3,
+            "log(n)",
+            "log(m)",
+            "factor(eps)",
         )
     )
     written.extend(
         _facet_plot(
             "collapse_scaled",
-            "Scaled Collapse: arms / epsilon",
+            "Numbers are arms / epsilon",
             "scaled_1",
             "epsilon",
             "m",
-            "m",
+            8,
+            "log(n)",
+            "log(m)",
+            "factor(eps)",
         )
     )
     written.extend(
         _facet_plot(
             "collapse_scaled_per_player",
-            "Scaled Collapse: arms / epsilon with m / players",
+            "Numbers are arms / epsilon",
             "scaled_1",
             "epsilon",
             "m_per_player",
-            "m / players",
+            8,
+            "log(n)",
+            "log(m / n_users)",
+            "factor(eps)",
         )
     )
+    bundle_path = Path(f"{prefix}_bundle.pdf")
+    _prepare_output_path(bundle_path)
+    from matplotlib.backends.backend_pdf import PdfPages
+
+    with PdfPages(bundle_path) as pdf:
+        for fig in figures:
+            pdf.savefig(fig)
+            plt.close(fig)
+    written.append(bundle_path)
     return written
+
+
+def _format_factor_label(value: float) -> str:
+    if float(value).is_integer():
+        return str(int(value))
+    return f"{value:g}"
