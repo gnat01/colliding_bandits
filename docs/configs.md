@@ -17,11 +17,13 @@ Each config file is JSON:
 
 - `run`
 - `sweep`
+- `collapse`
 
 ## Default Files
 
 - [config/default.json](/Users/gn/work/learn/python/colliding_bandits/config/default.json)
 - [config/rho_sweep.json](/Users/gn/work/learn/python/colliding_bandits/config/rho_sweep.json)
+- [config/collapse_sweep.json](/Users/gn/work/learn/python/colliding_bandits/config/collapse_sweep.json)
 
 ## Keys For `run`
 
@@ -80,6 +82,23 @@ For each `rho`:
 players = round(rho * arms)
 ```
 
+## Keys For `collapse`
+
+Same generator / learner keys as `run`, but:
+
+- fixed `players`
+- use `arms_values`
+- use `epsilon_values`
+- use `repeats`
+- use `collapse_csv`
+- use `plot_prefix`
+
+This mode is currently intended for `epsilon-greedy`, because the scaling variable is:
+
+```text
+scaled_1 = arms / epsilon
+```
+
 ## Intended Workflow
 
 Medium run:
@@ -92,6 +111,12 @@ Sweep:
 
 ```bash
 python src/cli.py --config config/rho_sweep.json
+```
+
+Scaling collapse:
+
+```bash
+python src/cli.py --config config/collapse_sweep.json
 ```
 
 ## `randomise_arms`

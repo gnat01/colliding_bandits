@@ -46,6 +46,26 @@ This loads:
 
 and averages multiple runs at each `rho`.
 
+## Scaling Collapse
+
+Run the old-style scaling-collapse sweep:
+
+```bash
+python src/cli.py --config config/collapse_sweep.json
+```
+
+This loads:
+
+- [config/collapse_sweep.json](/Users/gn/work/learn/python/colliding_bandits/config/collapse_sweep.json)
+
+and sweeps over:
+
+- `arms_values`
+- `epsilon_values`
+- multiple seeds per pair
+
+then groups players by their learned best arm at the end of the run and writes the collapse table plus faceted PNG/PDF plots.
+
 ## Experiment Structure
 
 Each experiment has two phases.
@@ -123,22 +143,42 @@ For a run with `plot_prefix = outputs/medium_run` and `table_prefix = outputs/me
 ### Tables
 
 - `outputs/medium_run_player_total_reward.csv`
+- `outputs/medium_run_player_instant_reward.csv`
 - `outputs/medium_run_player_regret.csv`
+- `outputs/medium_run_arm_realized_rewards.csv`
+- `outputs/medium_run_arm_occupancy.csv`
+- `outputs/medium_run_arm_system_reward.csv`
+- `outputs/medium_run_arm_oracle_shortfall.csv`
 - `outputs/medium_run_arm_plays.csv`
 - `outputs/medium_run_arm_collisions.csv`
 - `outputs/medium_run_player_choices.csv`
 - `outputs/medium_run_final_estimates.csv`
 - `outputs/medium_run_metrics.csv`
+- `outputs/medium_run_oracle_trace.csv`
 
 ### Plots
 
 - `outputs/medium_run_player_total_reward.png`
+- `outputs/medium_run_player_total_reward.pdf`
 - `outputs/medium_run_player_regret.png`
+- `outputs/medium_run_player_regret.pdf`
 - `outputs/medium_run_arm_plays.png`
+- `outputs/medium_run_arm_plays.pdf`
 - `outputs/medium_run_arm_collisions.png`
+- `outputs/medium_run_arm_collisions.pdf`
+- `outputs/medium_run_arm_occupancy.png`
+- `outputs/medium_run_arm_occupancy.pdf`
 - `outputs/medium_run_player_choices_heatmap.png`
+- `outputs/medium_run_player_choices_heatmap.pdf`
+- `outputs/medium_run_arm_occupancy_heatmap.png`
+- `outputs/medium_run_arm_occupancy_heatmap.pdf`
+- `outputs/medium_run_arm_occupancy_histogram.gif`
 - `outputs/medium_run_mean_reward.png`
+- `outputs/medium_run_mean_reward.pdf`
 - `outputs/medium_run_mean_regret.png`
+- `outputs/medium_run_mean_regret.pdf`
+- `outputs/medium_run_oracle_trace_panel.png`
+- `outputs/medium_run_oracle_trace_panel.pdf`
 
 All time-series plots include a blue vertical line marking the end of exploration and the start of strategy.
 
@@ -164,6 +204,18 @@ Sweep outputs already generated:
 - [outputs/rho_sweep_efficiency_vs_rho.png](/Users/gn/work/learn/python/colliding_bandits/outputs/rho_sweep_efficiency_vs_rho.png)
 - [outputs/rho_sweep_occupancy_variance_vs_rho.png](/Users/gn/work/learn/python/colliding_bandits/outputs/rho_sweep_occupancy_variance_vs_rho.png)
 - [outputs/rho_sweep_late_regret_rate_vs_rho.png](/Users/gn/work/learn/python/colliding_bandits/outputs/rho_sweep_late_regret_rate_vs_rho.png)
+
+Collapse outputs already generated:
+
+- [outputs/collapse_sweep.csv](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep.csv)
+- [outputs/collapse_sweep_collapse_by_epsilon.png](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_by_epsilon.png)
+- [outputs/collapse_sweep_collapse_by_epsilon.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_by_epsilon.pdf)
+- [outputs/collapse_sweep_collapse_by_arms.png](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_by_arms.png)
+- [outputs/collapse_sweep_collapse_by_arms.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_by_arms.pdf)
+- [outputs/collapse_sweep_collapse_scaled.png](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled.png)
+- [outputs/collapse_sweep_collapse_scaled.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled.pdf)
+- [outputs/collapse_sweep_collapse_scaled_per_player.png](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_per_player.png)
+- [outputs/collapse_sweep_collapse_scaled_per_player.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_per_player.pdf)
 
 ## If You Want Your Own Config
 

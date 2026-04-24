@@ -4,11 +4,11 @@ import argparse
 from dataclasses import replace
 import json
 from pathlib import Path
-from statistics import mean
+from statistics import mean, stdev
 from typing import Dict, List
 
 from .models import parse_float_list
-from .plotting import plot_experiment, plot_sweep_lines
+from .plotting import plot_collapse_panels, plot_experiment, plot_sweep_lines
 from .simulator import (
     SimulationConfig,
     expand_rho_grid,
@@ -37,8 +37,9 @@ def _reward_vectors(args: argparse.Namespace) -> tuple[List[float] | None, List[
     return means, stds
 
 
-def add_common_args(parser: argparse.ArgumentParser, *, require_players: bool) -> None:
-    parser.add_argument("--arms", type=int, required=True, help="Number of arms K.")
+def add_common_args(parser: argparse.ArgumentParser, *, require_players: bool, require_arms: bool = True) -> None:
+    if require_arms:
+        parser.add_argument("--arms", type=int, required=True, help="Number of arms K.")
     parser.add_argument("--players", type=int, required=require_players, help="Number of players N.")
     parser.add_argument("--exploration-cycles", type=int, required=True, help="How many full offset cycles each player executes in exploration.")
     parser.add_argument("--strategy-steps", type=int, required=True, help="Number of strategy-phase steps after exploration.")
@@ -200,8 +201,51 @@ def _parse_rho_values(raw: str) -> List[float]:
     return parse_float_list(raw)
 
 
+def _parse_int_values(raw: str) -> List[int]:
+    return [int(value) for value in parse_float_list(raw)]
+
+
 def _average_rows(rows: List[Dict[str, float]]) -> Dict[str, float]:
     return {key: mean(row[key] for row in rows) for key in rows[0]}
+
+
+def _collapse_rows_from_result(result, *, epsilon: float, repeat_idx: int) -> List[Dict[str, float]]:
+    final_totals_row = result.player_total_reward_rows[-1]
+    player_totals = {
+        player_idx: final_totals_row[f"player_{player_idx}"]
+        for player_idx in range(result.config.players)
+    }
+    grouped_estimates: Dict[int, List[Dict[str, float]]] = {}
+    for row in result.final_estimate_rows:
+        grouped_estimates.setdefault(int(row["player"]), []).append(row)
+
+    arm_to_totals: Dict[int, List[float]] = {}
+    for player_idx, rows in grouped_estimates.items():
+        best_row = max(rows, key=lambda row: (row["estimated_mean"], row["samples"], -row["arm"]))
+        best_arm = int(best_row["arm"])
+        arm_to_totals.setdefault(best_arm, []).append(player_totals[player_idx])
+
+    collapse_rows: List[Dict[str, float]] = []
+    for arm_index, totals in sorted(arm_to_totals.items()):
+        cluster_size = len(totals)
+        avg_total = mean(totals)
+        sd_total = stdev(totals) if len(totals) >= 2 else 0.0
+        collapse_rows.append(
+            {
+                "value": float(arm_index),
+                "m": avg_total,
+                "s": sd_total,
+                "n": float(cluster_size),
+                "arms": float(result.config.arms),
+                "epsilon": epsilon,
+                "scaled_1": result.config.arms / epsilon,
+                "players": float(result.config.players),
+                "repeat": float(repeat_idx),
+                "m_per_player": avg_total / result.config.players,
+                "best_arm_mean": result.summary["best_arm_mean"],
+            }
+        )
+    return collapse_rows
 
 
 def command_sweep(args: argparse.Namespace) -> int:
@@ -231,6 +275,58 @@ def command_sweep(args: argparse.Namespace) -> int:
         write_sweep_csv(Path(args.sweep_csv), output_rows)
     if args.plot_prefix:
         for path in plot_sweep_lines(Path(args.plot_prefix), output_rows):
+            print(f"wrote plot: {path}")
+    return 0
+
+
+def command_collapse(args: argparse.Namespace) -> int:
+    if args.learner != "epsilon-greedy":
+        raise ValueError("collapse is currently defined only for epsilon-greedy, since the scaling variable is arms / epsilon")
+    if args.reward_means or args.reward_stds:
+        raise ValueError("collapse currently expects internally generated arms; do not pass reward_means or reward_stds")
+    arms_values = _parse_int_values(args.arms_values)
+    epsilon_values = _parse_rho_values(args.epsilon_values)
+    collapse_rows: List[Dict[str, float]] = []
+
+    for arm_index, arms in enumerate(arms_values):
+        for epsilon_index, epsilon in enumerate(epsilon_values):
+            for repeat_idx in range(args.repeats):
+                seed = args.seed + 10_000 * arm_index + 1_000 * epsilon_index + repeat_idx
+                config = SimulationConfig(
+                    arms=arms,
+                    players=args.players,
+                    exploration_cycles=args.exploration_cycles,
+                    strategy_steps=args.strategy_steps,
+                    seed=seed,
+                    learner=args.learner,
+                    mean_profile=args.mean_profile,
+                    std_profile=args.std_profile,
+                    reward_means=None,
+                    reward_stds=None,
+                    mean_low=args.mean_low,
+                    mean_high=args.mean_high,
+                    std_value=args.std_value,
+                    top_offset=args.top_offset,
+                    randomise_arms=args.randomise_arms,
+                    reward_distribution=args.reward_distribution,
+                    collision_rule="split",
+                    init_value=args.init_value,
+                    epsilon=epsilon,
+                    epsilon_decay=args.epsilon_decay,
+                    epsilon_min=args.epsilon_min,
+                    exploration_bonus=args.exploration_bonus,
+                )
+                result = run_simulation(config)
+                collapse_rows.extend(_collapse_rows_from_result(result, epsilon=epsilon, repeat_idx=repeat_idx))
+                print(
+                    f"arms={arms:>4} eps={epsilon:>6.3f} repeat={repeat_idx} "
+                    f"mean_reward={result.summary['mean_reward_average']:.4f}"
+                )
+
+    if args.collapse_csv:
+        write_sweep_csv(Path(args.collapse_csv), collapse_rows)
+    if args.plot_prefix:
+        for path in plot_collapse_panels(Path(args.plot_prefix), collapse_rows):
             print(f"wrote plot: {path}")
     return 0
 
@@ -277,6 +373,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Prefix for rho-line PNGs, e.g. outputs/sweep gives outputs/sweep_mean_reward_vs_rho.png.",
     )
     sweep_parser.set_defaults(func=command_sweep)
+
+    collapse_parser = subparsers.add_parser("collapse", help="Sweep over arms and epsilon and save scaling-collapse plots.")
+    add_common_args(collapse_parser, require_players=True, require_arms=False)
+    collapse_parser.add_argument("--arms-values", type=str, required=True, help="Comma-separated K values for the collapse sweep.")
+    collapse_parser.add_argument("--epsilon-values", type=str, required=True, help="Comma-separated epsilon values for the collapse sweep.")
+    collapse_parser.add_argument("--repeats", type=int, default=3, help="Number of seeds to average per (arms, epsilon) pair.")
+    collapse_parser.add_argument("--collapse-csv", type=str, default=None, help="CSV output for the collapse table.")
+    collapse_parser.add_argument(
+        "--plot-prefix",
+        type=str,
+        default=None,
+        help="Prefix for collapse PNG/PDF plots, e.g. outputs/collapse gives outputs/collapse_scaled.pdf.",
+    )
+    collapse_parser.set_defaults(func=command_collapse)
     return parser
 
 

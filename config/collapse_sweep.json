@@ -1,0 +1,25 @@
+{
+  "command": "collapse",
+  "args": {
+    "players": 101,
+    "exploration_cycles": 5,
+    "strategy_steps": 1000,
+    "seed": 123,
+    "learner": "epsilon-greedy",
+    "reward_distribution": "uniform",
+    "mean_profile": "uniform",
+    "mean_low": 0.5,
+    "mean_high": 100.0,
+    "std_profile": "constant",
+    "std_value": 0.15,
+    "top_offset": 0.35,
+    "randomise_arms": true,
+    "epsilon_decay": 0.0,
+    "epsilon_min": 0.01,
+    "arms_values": "5,10,20,40",
+    "epsilon_values": "0.1,0.2,0.4,0.8",
+    "repeats": 3,
+    "collapse_csv": "outputs/collapse_sweep.csv",
+    "plot_prefix": "outputs/collapse_sweep"
+  }
+}

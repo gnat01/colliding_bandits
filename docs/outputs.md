@@ -28,12 +28,26 @@ For `table_prefix = outputs/foo` and `plot_prefix = outputs/foo`:
 ### Plots
 
 - `outputs/foo_player_total_reward.png`
+- `outputs/foo_player_total_reward.pdf`
 - `outputs/foo_player_regret.png`
+- `outputs/foo_player_regret.pdf`
 - `outputs/foo_arm_plays.png`
+- `outputs/foo_arm_plays.pdf`
 - `outputs/foo_arm_collisions.png`
+- `outputs/foo_arm_collisions.pdf`
+- `outputs/foo_arm_occupancy.png`
+- `outputs/foo_arm_occupancy.pdf`
 - `outputs/foo_player_choices_heatmap.png`
+- `outputs/foo_player_choices_heatmap.pdf`
+- `outputs/foo_arm_occupancy_heatmap.png`
+- `outputs/foo_arm_occupancy_heatmap.pdf`
+- `outputs/foo_arm_occupancy_histogram.gif`
 - `outputs/foo_mean_reward.png`
+- `outputs/foo_mean_reward.pdf`
 - `outputs/foo_mean_regret.png`
+- `outputs/foo_mean_regret.pdf`
+- `outputs/foo_oracle_trace_panel.png`
+- `outputs/foo_oracle_trace_panel.pdf`
 
 ## Sweep Outputs
 
@@ -45,6 +59,20 @@ For `plot_prefix = outputs/rho_sweep`:
 - `outputs/rho_sweep_efficiency_vs_rho.png`
 - `outputs/rho_sweep_occupancy_variance_vs_rho.png`
 - `outputs/rho_sweep_late_regret_rate_vs_rho.png`
+
+## Collapse Outputs
+
+For `plot_prefix = outputs/collapse_sweep`:
+
+- `outputs/collapse_sweep.csv`
+- `outputs/collapse_sweep_collapse_by_epsilon.png`
+- `outputs/collapse_sweep_collapse_by_epsilon.pdf`
+- `outputs/collapse_sweep_collapse_by_arms.png`
+- `outputs/collapse_sweep_collapse_by_arms.pdf`
+- `outputs/collapse_sweep_collapse_scaled.png`
+- `outputs/collapse_sweep_collapse_scaled.pdf`
+- `outputs/collapse_sweep_collapse_scaled_per_player.png`
+- `outputs/collapse_sweep_collapse_scaled_per_player.pdf`
 
 ## What The Main Tables Mean
 
@@ -87,6 +115,9 @@ For `plot_prefix = outputs/rho_sweep`:
 `oracle_trace.csv`
 : per-time oracle/system aggregate trace using the best-arm oracle
 
+`collapse_sweep.csv`
+: one row per learned best-arm cluster, with cluster size `n`, mean cumulative reward `m`, reward spread `s`, and the scaling variable `scaled_1 = arms / epsilon`
+
 ## What The Main Plots Mean
 
 The blue vertical line marks the end of exploration and the start of strategy.
@@ -111,3 +142,15 @@ The blue vertical line marks the end of exploration and the start of strategy.
 
 `mean_regret.png`
 : mean player regret over time
+
+`collapse_by_epsilon.*`
+: facet by `epsilon`, color by `arms`, plot `n` against `m` on log-log axes
+
+`collapse_by_arms.*`
+: facet by `arms`, color by `epsilon`, plot `n` against `m` on log-log axes
+
+`collapse_scaled.*`
+: facet by `scaled_1 = arms / epsilon`, color by `epsilon`, plot `n` against `m` on log-log axes
+
+`collapse_scaled_per_player.*`
+: same as above, but with `m / players` on the vertical axis

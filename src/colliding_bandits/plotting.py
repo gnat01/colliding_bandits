@@ -27,6 +27,14 @@ def _prepare_output_path(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
 
+def _save_figure(fig, output_path: Path) -> List[Path]:
+    _prepare_output_path(output_path)
+    pdf_path = output_path.with_suffix(".pdf")
+    fig.savefig(output_path, dpi=180)
+    fig.savefig(pdf_path)
+    return [output_path, pdf_path]
+
+
 def _plot_multi_line(prefix: Path, suffix: str, title: str, x_label: str, y_label: str, rows, exploration_steps: int) -> Path:
     plt = _import_pyplot()
     output_path = Path(f"{prefix}_{suffix}")
@@ -42,7 +50,7 @@ def _plot_multi_line(prefix: Path, suffix: str, title: str, x_label: str, y_labe
     ax.set_ylabel(y_label)
     ax.grid(alpha=0.25)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=170)
+    _save_figure(fig, output_path)
     plt.close(fig)
     return output_path
 
@@ -64,7 +72,7 @@ def _plot_choice_heatmap(prefix: Path, rows, exploration_steps: int) -> Path:
     cbar = fig.colorbar(image, ax=ax)
     cbar.set_label("Arm Index")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    _save_figure(fig, output_path)
     plt.close(fig)
     return output_path
 
@@ -86,7 +94,7 @@ def _plot_occupancy_heatmap(prefix: Path, rows, exploration_steps: int) -> Path:
     cbar = fig.colorbar(image, ax=ax)
     cbar.set_label("Occupancy")
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    _save_figure(fig, output_path)
     plt.close(fig)
     return output_path
 
@@ -208,7 +216,7 @@ def _plot_mean_lines(prefix: Path, suffix: str, title: str, steps, values, oracl
     ax.grid(alpha=0.25)
     ax.legend()
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    _save_figure(fig, output_path)
     plt.close(fig)
     return output_path
 
@@ -242,7 +250,7 @@ def _plot_oracle_trace_panel(prefix: Path, result) -> Path:
         ax.grid(alpha=0.25)
 
     fig.tight_layout()
-    fig.savefig(output_path, dpi=180)
+    _save_figure(fig, output_path)
     plt.close(fig)
     return output_path
 
@@ -368,7 +376,108 @@ def plot_sweep_lines(prefix: Path, rows: Sequence[dict]) -> List[Path]:
         ax.set_ylabel(metric_key)
         ax.grid(alpha=0.25)
         fig.tight_layout()
-        fig.savefig(output_path, dpi=180)
+        _save_figure(fig, output_path)
         plt.close(fig)
         written.append(output_path)
+    return written
+
+
+def plot_collapse_panels(prefix: Path, rows: Sequence[dict]) -> List[Path]:
+    if not rows:
+        return []
+    plt = _import_pyplot()
+    valid_rows = [row for row in rows if row["n"] > 0 and row["m"] > 0]
+    if not valid_rows:
+        return []
+
+    def _facet_plot(
+        suffix: str,
+        title: str,
+        facet_key: str,
+        color_key: str,
+        y_key: str,
+        y_label: str,
+    ) -> List[Path]:
+        facet_values = sorted({row[facet_key] for row in valid_rows})
+        ncols = min(3, max(1, len(facet_values)))
+        nrows = (len(facet_values) + ncols - 1) // ncols
+        fig, axes = plt.subplots(nrows, ncols, figsize=(5.2 * ncols, 4.3 * nrows), squeeze=False)
+        color_values = sorted({row[color_key] for row in valid_rows})
+        cmap = plt.get_cmap("viridis")
+        color_map = {
+            value: cmap(index / max(1, len(color_values) - 1))
+            for index, value in enumerate(color_values)
+        }
+
+        for ax, facet_value in zip(axes.flat, facet_values):
+            subset = [row for row in valid_rows if row[facet_key] == facet_value]
+            for color_value in color_values:
+                curve = [row for row in subset if row[color_key] == color_value and row[y_key] > 0]
+                if not curve:
+                    continue
+                curve = sorted(curve, key=lambda row: row["n"])
+                xs = [row["n"] for row in curve]
+                ys = [row[y_key] for row in curve]
+                ax.plot(xs, ys, marker="o", linewidth=1.2, markersize=4, alpha=0.9, color=color_map[color_value], label=str(color_value))
+            ax.set_xscale("log")
+            ax.set_yscale("log")
+            ax.set_title(f"{facet_key} = {facet_value:g}")
+            ax.set_xlabel("n")
+            ax.set_ylabel(y_label)
+            ax.grid(alpha=0.25)
+
+        for ax in axes.flat[len(facet_values):]:
+            ax.axis("off")
+
+        handles, labels = axes.flat[0].get_legend_handles_labels()
+        if handles:
+            fig.legend(handles, labels, title=color_key, loc="upper center", ncol=min(5, len(labels)))
+        fig.suptitle(title)
+        fig.tight_layout(rect=(0, 0, 1, 0.94))
+        output_path = Path(f"{prefix}_{suffix}.png")
+        saved = _save_figure(fig, output_path)
+        plt.close(fig)
+        return saved
+
+    written: List[Path] = []
+    written.extend(
+        _facet_plot(
+            "collapse_by_epsilon",
+            "Collapse View By epsilon",
+            "epsilon",
+            "arms",
+            "m",
+            "m",
+        )
+    )
+    written.extend(
+        _facet_plot(
+            "collapse_by_arms",
+            "Collapse View By arms",
+            "arms",
+            "epsilon",
+            "m",
+            "m",
+        )
+    )
+    written.extend(
+        _facet_plot(
+            "collapse_scaled",
+            "Scaled Collapse: arms / epsilon",
+            "scaled_1",
+            "epsilon",
+            "m",
+            "m",
+        )
+    )
+    written.extend(
+        _facet_plot(
+            "collapse_scaled_per_player",
+            "Scaled Collapse: arms / epsilon with m / players",
+            "scaled_1",
+            "epsilon",
+            "m_per_player",
+            "m / players",
+        )
+    )
     return written
