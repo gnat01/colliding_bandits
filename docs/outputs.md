@@ -154,3 +154,9 @@ The blue vertical line marks the end of exploration and the start of strategy.
 
 `collapse_scaled_per_player.*`
 : same as above, but with `m / players` on the vertical axis
+
+`collapse_scaled_binned_ggplot.*`
+: repeat-averaged `m(n)` curves with 95% ribbons, faceted by `scaled_1 = arms / epsilon`
+
+`collapse_scaled_per_player_binned_ggplot.*`
+: repeat-averaged `m(n) / players` curves with 95% ribbons, faceted by `scaled_1 = arms / epsilon`

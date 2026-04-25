@@ -16,9 +16,9 @@
     "randomise_arms": true,
     "epsilon_decay": 0.0,
     "epsilon_min": 0.01,
-    "arms_values": "5,10,20,40",
-    "epsilon_values": "0.1,0.2,0.4,0.8",
-    "repeats": 3,
+    "arms_values": "5,10,20,40,80",
+    "epsilon_values": "0.05,0.1,0.2,0.4,0.8",
+    "repeats": 6,
     "collapse_csv": "outputs/collapse_sweep.csv",
     "plot_prefix": "outputs/collapse_sweep"
   }

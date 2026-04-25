@@ -235,6 +235,8 @@ GGPlot collapse outputs:
 - [outputs/collapse_sweep_collapse_by_arms_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_by_arms_ggplot.pdf)
 - [outputs/collapse_sweep_collapse_scaled_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_ggplot.pdf)
 - [outputs/collapse_sweep_collapse_scaled_per_player_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_per_player_ggplot.pdf)
+- [outputs/collapse_sweep_collapse_scaled_binned_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_binned_ggplot.pdf)
+- [outputs/collapse_sweep_collapse_scaled_per_player_binned_ggplot.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_collapse_scaled_per_player_binned_ggplot.pdf)
 - [outputs/collapse_sweep_ggplot_bundle.pdf](/Users/gn/work/learn/python/colliding_bandits/outputs/collapse_sweep_ggplot_bundle.pdf)
 
 ## If You Want Your Own Config

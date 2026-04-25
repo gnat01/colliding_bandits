@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 from pathlib import Path
 import tempfile
@@ -402,6 +403,8 @@ def plot_collapse_panels(prefix: Path, rows: Sequence[dict]) -> List[Path]:
         x_label: str,
         y_label: str,
         legend_title: str,
+        *,
+        averaged: bool = False,
     ) -> List[Path]:
         facet_values = sorted({row[facet_key] for row in valid_rows})
         ncols = max(1, (len(facet_values) + nrows - 1) // nrows)
@@ -419,21 +422,40 @@ def plot_collapse_panels(prefix: Path, rows: Sequence[dict]) -> List[Path]:
                 curve = [row for row in subset if row[color_key] == color_value and row[y_key] > 0]
                 if not curve:
                     continue
-                xs = [row["n"] for row in curve]
-                ys = [row[y_key] for row in curve]
-                log_xs = [__import__("math").log(x) for x in xs if x > 0]
-                log_ys = [__import__("math").log(y) for y in ys if y > 0]
+                if averaged:
+                    by_n = {}
+                    for row in curve:
+                        by_n.setdefault(row["n"], []).append(row[y_key])
+                    xs = sorted(by_n)
+                    ys = [sum(by_n[x]) / len(by_n[x]) for x in xs]
+                else:
+                    xs = [row["n"] for row in curve]
+                    ys = [row[y_key] for row in curve]
+                log_xs = [math.log(x) for x in xs if x > 0]
+                log_ys = [math.log(y) for y in ys if y > 0]
                 points = list(zip(log_xs, log_ys))
                 if not points:
                     continue
-                ax.scatter(
-                    [point[0] for point in points],
-                    [point[1] for point in points],
-                    s=20,
-                    alpha=0.95,
-                    color=color_map[color_value],
-                    label=_format_factor_label(color_value),
-                )
+                if averaged:
+                    ax.plot(
+                        [point[0] for point in points],
+                        [point[1] for point in points],
+                        marker="o",
+                        markersize=3.5,
+                        linewidth=1.1,
+                        alpha=0.95,
+                        color=color_map[color_value],
+                        label=_format_factor_label(color_value),
+                    )
+                else:
+                    ax.scatter(
+                        [point[0] for point in points],
+                        [point[1] for point in points],
+                        s=20,
+                        alpha=0.95,
+                        color=color_map[color_value],
+                        label=_format_factor_label(color_value),
+                    )
             ax.set_title(_format_factor_label(facet_value), fontsize=10)
             ax.set_xlabel(x_label)
             ax.set_ylabel(y_label)
@@ -505,6 +527,60 @@ def plot_collapse_panels(prefix: Path, rows: Sequence[dict]) -> List[Path]:
             8,
             "log(n)",
             "log(m / n_users)",
+            "factor(eps)",
+        )
+    )
+    written.extend(
+        _facet_plot(
+            "collapse_scaled_binned",
+            "Numbers are arms / epsilon",
+            "scaled_1",
+            "epsilon",
+            "m",
+            8,
+            "log(n)",
+            "log(m)",
+            "factor(eps)",
+            averaged=True,
+        )
+    )
+    written.extend(
+        _facet_plot(
+            "collapse_scaled_per_player_binned",
+            "Numbers are arms / epsilon",
+            "scaled_1",
+            "epsilon",
+            "m_per_player",
+            8,
+            "log(n)",
+            "log(m / n_users)",
+            "factor(eps)",
+            averaged=True,
+        )
+    )
+    written.extend(
+        _facet_plot(
+            "collapse_rho",
+            "Numbers are rho",
+            "rho",
+            "epsilon",
+            "m",
+            8,
+            "log(n)",
+            "log(m)",
+            "factor(eps)",
+        )
+    )
+    written.extend(
+        _facet_plot(
+            "collapse_k_times_epsilon",
+            "Numbers are arms * epsilon",
+            "scaled_2",
+            "epsilon",
+            "m",
+            8,
+            "log(n)",
+            "log(m)",
             "factor(eps)",
         )
     )
